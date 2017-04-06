@@ -14,7 +14,12 @@
 
 package netbox
 
-import "reflect"
+import (
+	"net/http"
+	"net/url"
+	"reflect"
+	"testing"
+)
 
 func deviceEqual(a, b *Device) bool {
 	var obsAB = []struct {
@@ -54,4 +59,239 @@ func deviceEqual(a, b *Device) bool {
 	}
 
 	return true
+}
+
+func devicesSlicesEqual(a, b []*Device) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if !deviceEqual(a[i], b[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func TestListDevicesOptionsValues(t *testing.T) {
+	var tests = []struct {
+		desc string
+		o    *ListDevicesOptions
+		v    url.Values
+	}{
+		{
+			desc: "empty options",
+		},
+		{
+			desc: "name only",
+			o:    &ListDevicesOptions{Name: "Hello"},
+			v: url.Values{
+				"name": []string{"Hello"},
+			},
+		},
+		{
+			desc: "serial only",
+			o:    &ListDevicesOptions{Serial: "my_serial"},
+			v: url.Values{
+				"serial": []string{"my_serial"},
+			},
+		},
+		{
+			desc: "site_id only",
+			o:    &ListDevicesOptions{SiteID: 1},
+			v: url.Values{
+				"site_id": []string{"1"},
+			},
+		},
+		{
+			desc: "site only",
+			o:    &ListDevicesOptions{Site: "my_site"},
+			v: url.Values{
+				"site": []string{"my_site"},
+			},
+		},
+		{
+			desc: "site_id and site",
+			o:    &ListDevicesOptions{SiteID: 1, Site: "my_site"},
+			v: url.Values{
+				"site_id": []string{"1"},
+			},
+		},
+		{
+			desc: "1 rack_group_id",
+			o:    &ListDevicesOptions{RackGroupID: []int{1}},
+			v: url.Values{
+				"rack_group_id": []string{"1"},
+			},
+		},
+		{
+			desc: "3 rack_group_id",
+			o:    &ListDevicesOptions{RackGroupID: []int{1, 2, 3}},
+			v: url.Values{
+				"rack_group_id": []string{"1", "2", "3"},
+			},
+		},
+		{
+			desc: "1 rack_id",
+			o:    &ListDevicesOptions{RackID: []int{1}},
+			v: url.Values{
+				"rack_id": []string{"1"},
+			},
+		},
+		{
+			desc: "3 rack_id",
+			o:    &ListDevicesOptions{RackID: []int{1, 2, 3}},
+			v: url.Values{
+				"rack_id": []string{"1", "2", "3"},
+			},
+		},
+		{
+			desc: "1 role_id",
+			o:    &ListDevicesOptions{RoleID: []int{1}},
+			v: url.Values{
+				"role_id": []string{"1"},
+			},
+		},
+		{
+			desc: "3 role_id",
+			o:    &ListDevicesOptions{RoleID: []int{1, 2, 3}},
+			v: url.Values{
+				"role_id": []string{"1", "2", "3"},
+			},
+		},
+		{
+			desc: "3 role",
+			o:    &ListDevicesOptions{Role: []string{"role1", "role2", "role3"}},
+			v: url.Values{
+				"role": []string{"role1", "role2", "role3"},
+			},
+		},
+		{
+			desc: "role_id and role",
+			o:    &ListDevicesOptions{RoleID: []int{1}, Role: []string{"my_role"}},
+			v: url.Values{
+				"role_id": []string{"1"},
+			},
+		},
+		{
+			desc: "1 tenant_id",
+			o:    &ListDevicesOptions{TenantID: []int{1}},
+			v: url.Values{
+				"tenant_id": []string{"1"},
+			},
+		},
+		{
+			desc: "3 tenant_id",
+			o:    &ListDevicesOptions{TenantID: []int{1, 2, 3}},
+			v: url.Values{
+				"tenant_id": []string{"1", "2", "3"},
+			},
+		},
+		{
+			desc: "3 tenant",
+			o:    &ListDevicesOptions{Tenant: []string{"tenant1", "tenant2", "tenant3"}},
+			v: url.Values{
+				"tenant": []string{"tenant1", "tenant2", "tenant3"},
+			},
+		},
+		{
+			desc: "tenant_id and tenant",
+			o:    &ListDevicesOptions{TenantID: []int{1}, Tenant: []string{"my_tenant"}},
+			v: url.Values{
+				"tenant_id": []string{"1"},
+			},
+		},
+		{
+			desc: "1 manufacturer_id",
+			o:    &ListDevicesOptions{ManufacturerID: []int{1}},
+			v: url.Values{
+				"manufacturer_id": []string{"1"},
+			},
+		},
+		{
+			desc: "3 manufacturer_id",
+			o:    &ListDevicesOptions{ManufacturerID: []int{1, 2, 3}},
+			v: url.Values{
+				"manufacturer_id": []string{"1", "2", "3"},
+			},
+		},
+		{
+			desc: "3 manufacturer",
+			o:    &ListDevicesOptions{Manufacturer: []string{"manufacturer1", "manufacturer2", "manufacturer3"}},
+			v: url.Values{
+				"manufacturer": []string{"manufacturer1", "manufacturer2", "manufacturer3"},
+			},
+		},
+		{
+			desc: "manufacturer_id and manufacturer",
+			o:    &ListDevicesOptions{ManufacturerID: []int{1}, Manufacturer: []string{"my_manufacturer"}},
+			v: url.Values{
+				"manufacturer_id": []string{"1"},
+			},
+		},
+		{
+			desc: "1 device_type_id",
+			o:    &ListDevicesOptions{DeviceTypeID: []int{1}},
+			v: url.Values{
+				"device_type_id": []string{"1"},
+			},
+		},
+		{
+			desc: "3 device_type_id",
+			o:    &ListDevicesOptions{DeviceTypeID: []int{1, 2, 3}},
+			v: url.Values{
+				"device_type_id": []string{"1", "2", "3"},
+			},
+		},
+	}
+
+	for i, tt := range tests {
+		t.Logf("[%02d] test %q", i, tt.desc)
+
+		v, err := tt.o.values()
+		if err != nil {
+			t.Fatalf("unexpected Values error: %v", err)
+		}
+
+		if want, got := tt.v, v; !reflect.DeepEqual(want, got) {
+			t.Fatalf("unexpected url.Values map:\n- want: %v\n-  got: %v",
+				want, got)
+		}
+	}
+}
+
+func TestClientDCIMGetDevice(t *testing.T) {
+	wantDevice := testDevice(1)
+
+	c, done := testClient(t, testHandler(t, http.MethodGet, "/api/dcim/devices/1", wantDevice))
+	defer done()
+
+	gotDevice, err := c.DCIM.GetDevice(wantDevice.ID)
+	if err != nil {
+		t.Fatalf("unexpected error from Client.DCIM.GetDevice: %v", err)
+	}
+
+	if !deviceEqual(wantDevice, gotDevice) {
+		t.Fatalf("unexpected Device:\n- want: %v\n-  got: %v", wantDevice, gotDevice)
+	}
+}
+
+func TestClientDCIMListDevices(t *testing.T) {
+	want := []*Device{
+		testDevice(1),
+		testDevice(2),
+	}
+
+	c, done := testClient(t, testHandler(t, http.MethodGet, "/api/dcim/devices/", want))
+	defer done()
+
+	got, err := c.DCIM.ListDevices(nil)
+	if err != nil {
+		t.Fatalf("unexpected error from Client.DCIM.ListDevices: %v", err)
+	}
+
+	if !devicesSlicesEqual(want, got) {
+		t.Fatalf("unexpected Devices:\n- want: %v\n-  got: %v", want, got)
+	}
 }

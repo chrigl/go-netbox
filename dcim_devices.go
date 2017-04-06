@@ -95,9 +95,8 @@ func (s *DCIMService) ListDevices(options *ListDevicesOptions) ([]*Device, error
 // Integer fields with an *ID suffix are preferred over their string
 // counterparts, and if both are set, only the *ID field will be used.
 type ListDevicesOptions struct {
-	Name     string
-	Serial   string
-	AssetTag string
+	Name   string
+	Serial string
 
 	SiteID         int
 	Site           string
@@ -122,6 +121,13 @@ func (o *ListDevicesOptions) values() (url.Values, error) {
 	}
 
 	v := url.Values{}
+
+	if o.Name != "" {
+		v.Set("name", o.Name)
+	}
+	if o.Serial != "" {
+		v.Set("serial", o.Serial)
+	}
 
 	switch {
 	case o.SiteID > 0:
