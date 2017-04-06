@@ -109,10 +109,14 @@ func (ip *IPAddress) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	_, ipNet, err := net.ParseCIDR(raw.Address)
+	ipAddr, ipN, err := net.ParseCIDR(raw.Address)
 	if err != nil {
 		return err
 	}
+	// Convert ipAddr + ipN.Mask back into net.IPNet, because net.ParseCIDR uses
+	// the network address as IP. This works well as long as all Host IPs are /32
+	// on the netbox server. But not if they are e.g. /25.
+	ipNet := &net.IPNet{IP: ipAddr, Mask: ipN.Mask}
 
 	*ip = IPAddress{
 		ID:          raw.ID,
@@ -151,10 +155,14 @@ func (ip *IPAddressIdentifier) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	_, ipNet, err := net.ParseCIDR(raw.Address)
+	ipAddr, ipN, err := net.ParseCIDR(raw.Address)
 	if err != nil {
 		return err
 	}
+	// Convert ipAddr + ipN.Mask back into net.IPNet, because net.ParseCIDR uses
+	// the network address as IP. This works well as long as all Host IPs are /32
+	// on the netbox server. But not if they are e.g. /25.
+	ipNet := &net.IPNet{IP: ipAddr, Mask: ipN.Mask}
 
 	*ip = IPAddressIdentifier{
 		ID:      raw.ID,
