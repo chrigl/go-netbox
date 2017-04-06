@@ -174,6 +174,7 @@ type ListIPAddressesOptions struct {
 	InterfaceID []int
 	DeviceID    []int
 	Device      []string
+	Parent      *net.IPNet
 
 	// Query is a special option which enables free-form search.
 	// For example, Query could be an IP address such as "8.8.8.8".
@@ -216,6 +217,10 @@ func (o *ListIPAddressesOptions) values() (url.Values, error) {
 		for _, d := range o.Device {
 			v.Add("device", d)
 		}
+	}
+
+	if o.Parent != nil {
+		v.Set("parent", o.Parent.String())
 	}
 
 	if o.Query != "" {

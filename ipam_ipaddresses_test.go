@@ -191,6 +191,15 @@ func TestListIPAddressesOptionsValues(t *testing.T) {
 			},
 		},
 		{
+			desc: "parent only",
+			o: &ListIPAddressesOptions{
+				Parent: &net.IPNet{IP: net.IPv4(10, 102, 0, 0), Mask: net.CIDRMask(16, 32)},
+			},
+			v: url.Values{
+				"parent": []string{"10.102.0.0/16"},
+			},
+		},
+		{
 			desc: "all options",
 			o: &ListIPAddressesOptions{
 				Family:      FamilyIPv4,
@@ -200,6 +209,7 @@ func TestListIPAddressesOptionsValues(t *testing.T) {
 				DeviceID:    []int{3},
 				Device:      []string{"device"},
 				Query:       "query",
+				Parent:      &net.IPNet{IP: net.IPv4(10, 102, 0, 0), Mask: net.CIDRMask(16, 32)},
 			},
 			v: url.Values{
 				"family":       []string{strconv.Itoa(int(FamilyIPv4))},
@@ -207,6 +217,7 @@ func TestListIPAddressesOptionsValues(t *testing.T) {
 				"interface_id": []string{"2"},
 				"device_id":    []string{"3"},
 				"q":            []string{"query"},
+				"parent":       []string{"10.102.0.0/16"},
 			},
 		},
 	}
