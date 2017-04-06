@@ -14,6 +14,13 @@
 
 package netbox
 
+import (
+	"fmt"
+	"net/http"
+	"net/url"
+	"strconv"
+)
+
 // Device is a network device.
 type Device struct {
 	ID           int                   `json:"id"`
@@ -56,4 +63,121 @@ type RackIdentifier struct {
 	Name        string `json:"name"`
 	FacilityID  string `json:"facility_id"`
 	DisplayName string `json:"display_name"`
+}
+
+func (s *DCIMService) GetDevice(id int) (*Device, error) {
+	req, err := s.c.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/api/dcim/devices/%d", id),
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	device := new(Device)
+	err = s.c.Do(req, device)
+	return device, err
+}
+
+func (s *DCIMService) ListDevices(options *ListDevicesOptions) ([]*Device, error) {
+	req, err := s.c.NewRequest(http.MethodGet, "/api/dcim/devices/", options)
+	if err != nil {
+		return nil, err
+	}
+
+	var devices []*Device
+	err = s.c.Do(req, &devices)
+	return devices, err
+}
+
+// ListDevicesOptions is used as an argument for Client.DCIM.ListDevices.
+// Integer fields with an *ID suffix are preferred over their string
+// counterparts, and if both are set, only the *ID field will be used.
+type ListDevicesOptions struct {
+	Name     string
+	Serial   string
+	AssetTag string
+
+	SiteID         int
+	Site           string
+	RackGroupID    []int
+	RackID         []int
+	RoleID         []int
+	Role           []string
+	TenantID       []int
+	Tenant         []string
+	DeviceTypeID   []int
+	ManufacturerID []int
+	Manufacturer   []string
+
+	// Query is a special option which enables free-form search.
+	// For example, Query could be an IP address such as "8.8.8.8".
+	Query string
+}
+
+func (o *ListDevicesOptions) values() (url.Values, error) {
+	if o == nil {
+		return nil, nil
+	}
+
+	v := url.Values{}
+
+	switch {
+	case o.SiteID > 0:
+		v.Add("site_id", strconv.Itoa(o.SiteID))
+	case o.Site != "":
+		v.Add("site", o.Site)
+	}
+
+	for _, r := range o.RackGroupID {
+		v.Add("rack_group_id", strconv.Itoa(r))
+	}
+
+	for _, r := range o.RackID {
+		v.Add("rack_id", strconv.Itoa(r))
+	}
+
+	switch {
+	case len(o.RoleID) > 0:
+		for _, r := range o.RoleID {
+			v.Add("role_id", strconv.Itoa(r))
+		}
+	case len(o.Role) > 0:
+		for _, r := range o.Role {
+			v.Add("role", r)
+		}
+	}
+
+	switch {
+	case len(o.TenantID) > 0:
+		for _, t := range o.TenantID {
+			v.Add("tenant_id", strconv.Itoa(t))
+		}
+	case len(o.Tenant) > 0:
+		for _, t := range o.Tenant {
+			v.Add("tenant", t)
+		}
+	}
+
+	for _, d := range o.DeviceTypeID {
+		v.Add("device_type_id", strconv.Itoa(d))
+	}
+
+	switch {
+	case len(o.ManufacturerID) > 0:
+		for _, m := range o.ManufacturerID {
+			v.Add("manufacturer_id", strconv.Itoa(m))
+		}
+	case len(o.Manufacturer) > 0:
+		for _, m := range o.Manufacturer {
+			v.Add("manufacturer", m)
+		}
+	}
+
+	if o.Query != "" {
+		v.Set("q", o.Query)
+	}
+
+	return v, nil
 }
