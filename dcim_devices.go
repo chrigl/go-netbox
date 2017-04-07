@@ -65,6 +65,7 @@ type RackIdentifier struct {
 	DisplayName string `json:"display_name"`
 }
 
+// GetDevice retrieves an Device object from NetBox by its ID.
 func (s *DCIMService) GetDevice(id int) (*Device, error) {
 	req, err := s.c.NewRequest(
 		http.MethodGet,
@@ -80,6 +81,10 @@ func (s *DCIMService) GetDevice(id int) (*Device, error) {
 	return device, err
 }
 
+// ListDevices retrieves a list of Device objects from NetBox, filtered according
+// to the parameters specified in options.
+//
+// If options is nil, all Devices will be retrieved.
 func (s *DCIMService) ListDevices(options *ListDevicesOptions) ([]*Device, error) {
 	req, err := s.c.NewRequest(http.MethodGet, "/api/dcim/devices/", options)
 	if err != nil {
