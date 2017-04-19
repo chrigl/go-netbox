@@ -271,12 +271,12 @@ func testInterfaceIdentifier(n int) *InterfaceIdentifier {
 
 func testIPAddress(family Family, n int) *IPAddress {
 	address := &net.IPNet{
-		IP:   net.IPv4(8, 8, 8, 0),
+		IP:   net.IPv4(8, 8, 8, 8),
 		Mask: net.CIDRMask(24, 32),
 	}
 	if family == FamilyIPv6 {
 		address = &net.IPNet{
-			IP:   net.ParseIP("2001:4860:4860::"),
+			IP:   net.ParseIP("2001:4860:4860::8888"),
 			Mask: net.CIDRMask(48, 128),
 		}
 	}
@@ -295,12 +295,12 @@ func testIPAddress(family Family, n int) *IPAddress {
 
 func testIPAddressIdentifier(family Family, n int) *IPAddressIdentifier {
 	address := &net.IPNet{
-		IP:   net.IPv4(8, 8, 8, 0),
+		IP:   net.IPv4(8, 8, 8, 8),
 		Mask: net.CIDRMask(24, 32),
 	}
 	if family == FamilyIPv6 {
 		address = &net.IPNet{
-			IP:   net.ParseIP("2001:4860:4860::"),
+			IP:   net.ParseIP("2001:4860:4860::8888"),
 			Mask: net.CIDRMask(48, 128),
 		}
 	}

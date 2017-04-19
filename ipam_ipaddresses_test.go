@@ -235,12 +235,12 @@ func TestIPAddressMarshalJSON(t *testing.T) {
 		{
 			desc: "IPv4 address",
 			ip:   testIPAddress(FamilyIPv4, 1),
-			b:    []byte(`{"id":1,"family":4,"address":"8.8.8.0/24","vrf":{"id":1,"name":"VRFIdentifier 1","rd":"rd 1"},"interface":{"id":1,"device":{"id":1,"name":"DeviceIdentifier 1"},"name":"InterfaceIdentifier 1"},"description":"description 1","nat_inside":{"id":1,"family":4,"address":"8.8.8.0/24"},"nat_outside":{"id":1,"family":4,"address":"8.8.8.0/24"}}`),
+			b:    []byte(`{"id":1,"family":4,"address":"8.8.8.8/24","vrf":{"id":1,"name":"VRFIdentifier 1","rd":"rd 1"},"interface":{"id":1,"device":{"id":1,"name":"DeviceIdentifier 1"},"name":"InterfaceIdentifier 1"},"description":"description 1","nat_inside":{"id":1,"family":4,"address":"8.8.8.8/24"},"nat_outside":{"id":1,"family":4,"address":"8.8.8.8/24"}}`),
 		},
 		{
 			desc: "IPv6 address",
 			ip:   testIPAddress(FamilyIPv6, 2),
-			b:    []byte(`{"id":2,"family":6,"address":"2001:4860:4860::/48","vrf":{"id":2,"name":"VRFIdentifier 2","rd":"rd 2"},"interface":{"id":2,"device":{"id":2,"name":"DeviceIdentifier 2"},"name":"InterfaceIdentifier 2"},"description":"description 2","nat_inside":{"id":2,"family":6,"address":"2001:4860:4860::/48"},"nat_outside":{"id":2,"family":6,"address":"2001:4860:4860::/48"}}`),
+			b:    []byte(`{"id":2,"family":6,"address":"2001:4860:4860::8888/48","vrf":{"id":2,"name":"VRFIdentifier 2","rd":"rd 2"},"interface":{"id":2,"device":{"id":2,"name":"DeviceIdentifier 2"},"name":"InterfaceIdentifier 2"},"description":"description 2","nat_inside":{"id":2,"family":6,"address":"2001:4860:4860::8888/48"},"nat_outside":{"id":2,"family":6,"address":"2001:4860:4860::8888/48"}}`),
 		},
 	}
 
@@ -316,12 +316,12 @@ func TestIPAddressIdentifierMarshalJSON(t *testing.T) {
 		{
 			desc: "IPv4 address",
 			ip:   testIPAddressIdentifier(FamilyIPv4, 1),
-			b:    []byte(`{"id":1,"family":4,"address":"8.8.8.0/24"}`),
+			b:    []byte(`{"id":1,"family":4,"address":"8.8.8.8/24"}`),
 		},
 		{
 			desc: "IPv6 address",
 			ip:   testIPAddressIdentifier(FamilyIPv6, 2),
-			b:    []byte(`{"id":2,"family":6,"address":"2001:4860:4860::/48"}`),
+			b:    []byte(`{"id":2,"family":6,"address":"2001:4860:4860::8888/48"}`),
 		},
 	}
 
