@@ -70,6 +70,12 @@ const (
 	StatusDeprecated Status = 3
 )
 
+type Page struct {
+	Count       int    `json:"count"`
+	NextURL     string `json:"next"`
+	PreviousURL string `json:"previous"`
+}
+
 // String returns the string representation of a Status.
 func (s Status) String() string {
 	switch s {

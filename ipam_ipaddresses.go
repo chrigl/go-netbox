@@ -23,16 +23,53 @@ import (
 	"strconv"
 )
 
+type IPAddressesService struct {
+	c *Client
+}
+
+func (s *IPAddressesService) Get(id int) (*IPAddress, error) {
+	req, err := s.c.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/api/ipam/ip-addresses/%d", id),
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	ip := new(IPAddress)
+	err = s.c.Do(req, ip)
+	return ip, err
+}
+
+func (s *IPAddressesService) List(options *ListIPAddressesOptions) (*IPAddresses, error) {
+	req, err := s.c.NewRequest(http.MethodGet, "/api/ipam/ip-addresses/", options)
+	if err != nil {
+		return nil, err
+	}
+
+	ips := new(IPAddresses)
+	err = s.c.Do(req, ips)
+	return ips, err
+}
+
+type IPAddresses struct {
+	Page
+	Results []*IPAddress `json:"results"`
+}
+
 // An IPAddress is an IPv4 or IPv6 address.
 type IPAddress struct {
 	ID          int
 	Family      Family
 	Address     *net.IPNet
 	VRF         *VRFIdentifier
-	Interface   *InterfaceIdentifier
+	Tenant      *TenantIdentifier
+	Interface   *InterfaceDetail
 	Description string
 	NATInside   *IPAddressIdentifier
 	NATOutside  *IPAddressIdentifier
+	Status      *IPAMStatus
 }
 
 // An IPAddressIdentifier is a reduced version of a IPAddress, returned as
@@ -81,10 +118,12 @@ type ipAddress struct {
 	Family      Family               `json:"family"`
 	Address     string               `json:"address"`
 	VRF         *VRFIdentifier       `json:"vrf"`
-	Interface   *InterfaceIdentifier `json:"interface"`
+	Tenant      *TenantIdentifier    `json:"tenant"`
+	Interface   *InterfaceDetail     `json:"interface"`
 	Description string               `json:"description"`
 	NATInside   *IPAddressIdentifier `json:"nat_inside"`
 	NATOutside  *IPAddressIdentifier `json:"nat_outside"`
+	Status      *IPAMStatus          `json:"status"`
 }
 
 // MarshalJSON marshals an IPAddress into JSON bytes.
@@ -94,10 +133,12 @@ func (ip *IPAddress) MarshalJSON() ([]byte, error) {
 		Family:      ip.Family,
 		Address:     ip.Address.String(),
 		VRF:         ip.VRF,
+		Tenant:      ip.Tenant,
 		Interface:   ip.Interface,
 		Description: ip.Description,
 		NATInside:   ip.NATInside,
 		NATOutside:  ip.NATOutside,
+		Status:      ip.Status,
 	})
 }
 
@@ -119,10 +160,12 @@ func (ip *IPAddress) UnmarshalJSON(b []byte) error {
 		Family:      raw.Family,
 		Address:     ipNet,
 		VRF:         raw.VRF,
+		Tenant:      raw.Tenant,
 		Interface:   raw.Interface,
 		Description: raw.Description,
 		NATInside:   raw.NATInside,
 		NATOutside:  raw.NATOutside,
+		Status:      raw.Status,
 	}
 	return nil
 }

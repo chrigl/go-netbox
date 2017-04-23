@@ -55,7 +55,7 @@ func NewClient(addr string, client *http.Client) (*Client, error) {
 	}
 
 	c.DCIM = &DCIMService{c: c}
-	c.IPAM = &IPAMService{c: c}
+	c.IPAM = &IPAMService{c: c, IPAddresses: &IPAddressesService{c: c}}
 
 	return c, nil
 }

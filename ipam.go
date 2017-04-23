@@ -16,5 +16,13 @@ package netbox
 
 // An IPAMService is used in a Client to access NetBox's IPAM API methods.
 type IPAMService struct {
-	c *Client
+	c           *Client
+	IPAddresses *IPAddressesService
+}
+
+// An IPAMStatus is used to represent the status of objects belonging to
+// the IPAM API
+type IPAMStatus struct {
+	Value int    `json:"value"`
+	Label string `json:"label"`
 }

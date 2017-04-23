@@ -14,28 +14,34 @@
 
 package netbox
 
+// FormFactor represents the form factor of an interface
+type FormFactor struct {
+	Value int    `json:"value"`
+	Label string `json:"Label"`
+}
+
 // Interface represents an interface object.
 type Interface struct {
-	ID                 int              `json:"id"`
-	Name               string           `json:"name"`
-	FormFactor         string           `json:"form_factor"`
-	MacAddress         string           `json:"mac_address"`
-	MgmtOnly           bool             `json:"mgmt_only"`
-	Description        string           `json:"description"`
-	IsConnected        bool             `json:"is_connected"`
-	ConnectedInterface *InterfaceDetail `json:"connected_interface"`
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	FormFactor  int    `json:"form_factor"` // Yes. Here it is an int :/
+	MacAddress  string `json:"mac_address"`
+	MgmtOnly    bool   `json:"mgmt_only"`
+	Description string `json:"description"`
+	IsConnected bool   `json:"is_connected"`
 }
 
 // InterfaceDetail represents an interface-detail object.
 type InterfaceDetail struct {
-	ID          int               `json:"id"`
-	Device      *DeviceIdentifier `json:"device"`
-	Name        string            `json:"name"`
-	FormFactor  string            `json:"form_factor"`
-	MacAddress  string            `json:"mac_address"`
-	MgmtOnly    bool              `json:"mgmt_only"`
-	Description string            `json:"description"`
-	IsConnected bool              `json:"is_connected"`
+	ID                 int               `json:"id"`
+	Name               string            `json:"name"`
+	Device             *DeviceIdentifier `json:"device"`
+	FormFactor         *FormFactor       `json:"form_factor"`
+	MacAddress         string            `json:"mac_address"`
+	MgmtOnly           bool              `json:"mgmt_only"`
+	Description        string            `json:"description"`
+	IsConnected        bool              `json:"is_connected"`
+	ConnectedInterface *Interface        `json:"connected_interface"`
 }
 
 // An InterfaceIdentifier is a reduced version of an Interface, returned as a
