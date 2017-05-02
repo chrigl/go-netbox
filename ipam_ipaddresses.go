@@ -27,6 +27,28 @@ type IPAddressesService struct {
 	c *Client
 }
 
+// List retrieves a page to a list of IPAddress objects from NetBox.
+// The Result can be filtererd with ListIPAddressesOptions.
+// Use page.Next() and Extract(page) to walk over the pages.
+func (s *IPAddressesService) List(options *ListIPAddressesOptions) *Page {
+	return NewPage(s.c, "/api/ipam/ip-addresses/", options)
+}
+
+// Extract unmarshals a list of IPAddress from page. You need to use this
+// in conjunction with List
+func (s *IPAddressesService) Extract(page *Page) ([]*IPAddress, error) {
+	if err := page.Err(); err != nil {
+		return nil, err
+	}
+
+	var ips []*IPAddress
+	if err := json.Unmarshal(page.data.Results, &ips); err != nil {
+		return nil, err
+	}
+	return ips, nil
+}
+
+// Get retrieves an IPAddress object from NetBox by its ID.
 func (s *IPAddressesService) Get(id int) (*IPAddress, error) {
 	req, err := s.c.NewRequest(
 		http.MethodGet,
@@ -40,22 +62,6 @@ func (s *IPAddressesService) Get(id int) (*IPAddress, error) {
 	ip := new(IPAddress)
 	err = s.c.Do(req, ip)
 	return ip, err
-}
-
-func (s *IPAddressesService) List(options *ListIPAddressesOptions) (*IPAddresses, error) {
-	req, err := s.c.NewRequest(http.MethodGet, "/api/ipam/ip-addresses/", options)
-	if err != nil {
-		return nil, err
-	}
-
-	ips := new(IPAddresses)
-	err = s.c.Do(req, ips)
-	return ips, err
-}
-
-type IPAddresses struct {
-	Page
-	Results []*IPAddress `json:"results"`
 }
 
 // An IPAddress is an IPv4 or IPv6 address.
@@ -79,37 +85,6 @@ type IPAddressIdentifier struct {
 	ID      int
 	Family  Family
 	Address *net.IPNet
-}
-
-// GetIPAddress retrieves an IPAddress object from NetBox by its ID.
-func (s *IPAMService) GetIPAddress(id int) (*IPAddress, error) {
-	req, err := s.c.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/api/ipam/ip-addresses/%d", id),
-		nil,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	ip := new(IPAddress)
-	err = s.c.Do(req, ip)
-	return ip, err
-}
-
-// ListIPAddresses retrives a list of IPAddress objects from NetBox, filtered according
-// to the parameters specified in options.
-//
-// If options is nil, all IPAddresses will be retrieved.
-func (s *IPAMService) ListIPAddresses(options *ListIPAddressesOptions) ([]*IPAddress, error) {
-	req, err := s.c.NewRequest(http.MethodGet, "/api/ipam/ip-addresses/", options)
-	if err != nil {
-		return nil, err
-	}
-
-	var ips []*IPAddress
-	err = s.c.Do(req, &ips)
-	return ips, err
 }
 
 // An ipAddress is the raw JSON representation of an IPAddress.
@@ -207,7 +182,7 @@ func (ip *IPAddressIdentifier) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// ListIPAddressesOptions is used as an argument for Client.IPAM.ListIPAddresses.
+// ListIPAddressesOptions is used as an argument for Client.IPAM.IPAddresses.List.
 // Integer fields with an *ID suffix are preferred over their string
 // counterparts, and if both are set, only the *ID field will be used.
 type ListIPAddressesOptions struct {

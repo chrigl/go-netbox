@@ -113,3 +113,13 @@ func (c *Client) Do(req *http.Request, v interface{}) error {
 
 	return json.NewDecoder(res.Body).Decode(v)
 }
+
+func (c *Client) DoRaw(req *http.Request) (*http.Response, error) {
+	res, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+
+	}
+
+	return res, nil
+}
