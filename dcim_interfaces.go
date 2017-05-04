@@ -22,26 +22,27 @@ type FormFactor struct {
 
 // Interface represents an interface object.
 type Interface struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	FormFactor  int    `json:"form_factor"` // Yes. Here it is an int :/
-	MacAddress  string `json:"mac_address"`
-	MgmtOnly    bool   `json:"mgmt_only"`
-	Description string `json:"description"`
-	IsConnected bool   `json:"is_connected"`
+	ID                 int                            `json:"id"`
+	Name               string                         `json:"name"`
+	Device             *DeviceIdentifier              `json:"device"`
+	FormFactor         *FormFactor                    `json:"form_factor"`
+	MacAddress         string                         `json:"mac_address"`
+	MgmtOnly           bool                           `json:"mgmt_only"`
+	Description        string                         `json:"description"`
+	ConnectedInterface *InterfaceDetail               `json:"connected_interface"`
+	Connection         *InterfaceConnectionIdentifier `json:"connection"`
 }
 
 // InterfaceDetail represents an interface-detail object.
+// It is used as a nested object as ConnectedInterface in Interface
 type InterfaceDetail struct {
-	ID                 int               `json:"id"`
-	Name               string            `json:"name"`
-	Device             *DeviceIdentifier `json:"device"`
-	FormFactor         *FormFactor       `json:"form_factor"`
-	MacAddress         string            `json:"mac_address"`
-	MgmtOnly           bool              `json:"mgmt_only"`
-	Description        string            `json:"description"`
-	IsConnected        bool              `json:"is_connected"`
-	ConnectedInterface *Interface        `json:"connected_interface"`
+	ID          int               `json:"id"`
+	Name        string            `json:"name"`
+	Device      *DeviceIdentifier `json:"device"`
+	FormFactor  int               `json:"form_factor"` // Yes. Here it is an int :/
+	MacAddress  string            `json:"mac_address"`
+	MgmtOnly    bool              `json:"mgmt_only"`
+	Description string            `json:"description"`
 }
 
 // An InterfaceIdentifier is a reduced version of an Interface, returned as a

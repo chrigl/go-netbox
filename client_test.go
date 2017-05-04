@@ -132,6 +132,40 @@ func testClient(t *testing.T, fn func(w http.ResponseWriter, r *http.Request)) (
 	return c, func() { s.Close() }
 }
 
+// Just to be able to override MarshalJSON.
+// For testing we need this impl e.g. in testHandler.
+// If we Marshal a real IPAddress, it needs to be much smaller
+// to be PUT, PATCHED against netbox-api v2
+type mockIPAddress IPAddress
+
+func getMockIPAddress(ip *IPAddress) *mockIPAddress {
+	var newIP mockIPAddress = mockIPAddress(*ip)
+	return &newIP
+}
+
+func getMockIPAddresses(ips []*IPAddress) []*mockIPAddress {
+	res := make([]*mockIPAddress, len(ips))
+	for i, ip := range ips {
+		res[i] = getMockIPAddress(ip)
+	}
+	return res
+}
+
+func (ip *mockIPAddress) MarshalJSON() ([]byte, error) {
+	return json.Marshal(ipAddress{
+		ID:          ip.ID,
+		Family:      ip.Family,
+		Address:     ip.Address.String(),
+		VRF:         ip.VRF,
+		Tenant:      ip.Tenant,
+		Interface:   ip.Interface,
+		Description: ip.Description,
+		NATInside:   ip.NATInside,
+		NATOutside:  ip.NATOutside,
+		Status:      ip.Status,
+	})
+}
+
 func testHandler(t *testing.T, method string, path string, v interface{}) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if want, got := method, r.Method; want != got {
@@ -235,16 +269,31 @@ func testDeviceTypeIdentifier(n int) *DeviceTypeIdentifier {
 	}
 }
 
+func testFormFactor(n int) *FormFactor {
+	return &FormFactor{
+		Value: n,
+		Label: fmt.Sprintf("FormFactor %d", n),
+	}
+}
+
+func testInterfaceConnectionIdentifier(n int) *InterfaceConnectionIdentifier {
+	return &InterfaceConnectionIdentifier{
+		ID:     n,
+		Status: true,
+	}
+}
+
 func testInterface(n int) *Interface {
 	return &Interface{
 		ID:                 n,
 		Name:               fmt.Sprintf("interface %d", n),
-		FormFactor:         fmt.Sprintf("form factor %d", n),
+		Device:             testDeviceIdentifier(n),
+		FormFactor:         testFormFactor(n),
 		MacAddress:         fmt.Sprintf("f4:9d:82:9e:34:c%d", n),
 		MgmtOnly:           true,
 		Description:        fmt.Sprintf("Description %d", n),
-		IsConnected:        true,
 		ConnectedInterface: testInterfaceDetail(n),
+		Connection:         testInterfaceConnectionIdentifier(n),
 	}
 }
 
@@ -252,12 +301,11 @@ func testInterfaceDetail(n int) *InterfaceDetail {
 	return &InterfaceDetail{
 		ID:          n,
 		Device:      testDeviceIdentifier(n),
-		Name:        fmt.Sprintf("interfacedetail %d", n),
-		FormFactor:  fmt.Sprintf("form factor %d", n),
+		FormFactor:  n,
+		Name:        fmt.Sprintf("InterfaceDetail %d", n),
 		MacAddress:  fmt.Sprintf("f4:9d:82:9e:34:c%d", n),
 		MgmtOnly:    true,
 		Description: fmt.Sprintf("Description %d", n),
-		IsConnected: true,
 	}
 }
 
@@ -266,6 +314,37 @@ func testInterfaceIdentifier(n int) *InterfaceIdentifier {
 		ID:     n,
 		Device: testDeviceIdentifier(n),
 		Name:   fmt.Sprintf("InterfaceIdentifier %d", n),
+	}
+}
+
+type testIPAddressPageData struct {
+	Count       int    `json:"count"`
+	NextURL     string `json:"next"`
+	PreviousURL string `json:"previous"`
+	Results     []*mockIPAddress
+}
+
+func testIPAddressPage(ips []*mockIPAddress) *testIPAddressPageData {
+	return &testIPAddressPageData{
+		Count:       len(ips),
+		NextURL:     "",
+		PreviousURL: "",
+		Results:     ips,
+	}
+}
+
+func testTenantIdentifier(n int) *TenantIdentifier {
+	return &TenantIdentifier{
+		ID:   n,
+		Name: fmt.Sprintf("Tenant %d", n),
+		Slug: fmt.Sprintf("tenant-%d", n),
+	}
+}
+
+func testIPAMStatus(n int) *IPAMStatus {
+	return &IPAMStatus{
+		Value: n,
+		Label: fmt.Sprintf("Label %d", n),
 	}
 }
 
@@ -286,10 +365,12 @@ func testIPAddress(family Family, n int) *IPAddress {
 		Family:      family,
 		Address:     address,
 		VRF:         testVRFIdentifier(n),
-		Interface:   testInterfaceIdentifier(n),
+		Tenant:      testTenantIdentifier(n),
+		Interface:   testInterface(n),
 		Description: fmt.Sprintf("description %d", n),
 		NATInside:   testIPAddressIdentifier(family, n),
 		NATOutside:  testIPAddressIdentifier(family, n),
+		Status:      testIPAMStatus(n),
 	}
 }
 

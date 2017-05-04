@@ -71,7 +71,7 @@ type IPAddress struct {
 	Address     *net.IPNet
 	VRF         *VRFIdentifier
 	Tenant      *TenantIdentifier
-	Interface   *InterfaceDetail
+	Interface   *Interface
 	Description string
 	NATInside   *IPAddressIdentifier
 	NATOutside  *IPAddressIdentifier
@@ -94,26 +94,54 @@ type ipAddress struct {
 	Address     string               `json:"address"`
 	VRF         *VRFIdentifier       `json:"vrf"`
 	Tenant      *TenantIdentifier    `json:"tenant"`
-	Interface   *InterfaceDetail     `json:"interface"`
+	Interface   *Interface           `json:"interface"`
 	Description string               `json:"description"`
 	NATInside   *IPAddressIdentifier `json:"nat_inside"`
 	NATOutside  *IPAddressIdentifier `json:"nat_outside"`
 	Status      *IPAMStatus          `json:"status"`
 }
 
+type ipAddressOut struct {
+	ID          int    `json:"id"`
+	Family      Family `json:"family"`
+	Address     string `json:"address"`
+	VRF         int    `json:"vrf"`
+	Tenant      int    `json:"tenant"`
+	Interface   int    `json:"interface"`
+	Description string `json:"description"`
+	NATInside   string `json:"nat_inside"`
+	Status      int    `json:"status"`
+}
+
 // MarshalJSON marshals an IPAddress into JSON bytes.
 func (ip *IPAddress) MarshalJSON() ([]byte, error) {
-	return json.Marshal(ipAddress{
+	var vrf, tenant, iface, status int
+	var natInside string
+	if ip.VRF != nil {
+		vrf = ip.VRF.ID
+	}
+	if ip.Tenant != nil {
+		tenant = ip.Tenant.ID
+	}
+	if ip.Interface != nil {
+		iface = ip.Interface.ID
+	}
+	if ip.Status != nil {
+		status = ip.Status.Value
+	}
+	if ip.NATInside != nil && ip.NATInside.Address != nil {
+		natInside = ip.NATInside.Address.String()
+	}
+	return json.Marshal(ipAddressOut{
 		ID:          ip.ID,
 		Family:      ip.Family,
 		Address:     ip.Address.String(),
-		VRF:         ip.VRF,
-		Tenant:      ip.Tenant,
-		Interface:   ip.Interface,
+		VRF:         vrf,
+		Tenant:      tenant,
+		Interface:   iface,
 		Description: ip.Description,
-		NATInside:   ip.NATInside,
-		NATOutside:  ip.NATOutside,
-		Status:      ip.Status,
+		NATInside:   natInside,
+		Status:      status,
 	})
 }
 

@@ -65,7 +65,7 @@ func ExampleNewClient() {
 	}
 
 	// Retrieve an IPAddress with ID 1
-	ip, err := c.IPAM.GetIPAddress(1)
+	ip, err := c.IPAM.IPAddresses.Get(1)
 	if err != nil {
 		panic(fmt.Sprintf("failed to retrieve IP address: %v", err))
 	}
