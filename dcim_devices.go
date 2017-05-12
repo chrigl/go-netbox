@@ -69,7 +69,7 @@ type RackIdentifier struct {
 func (s *DCIMService) GetDevice(id int) (*Device, error) {
 	req, err := s.c.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf("/api/dcim/devices/%d", id),
+		fmt.Sprintf("/api/dcim/devices/%d/", id),
 		nil,
 	)
 	if err != nil {

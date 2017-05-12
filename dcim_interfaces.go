@@ -14,6 +14,11 @@
 
 package netbox
 
+import (
+	"fmt"
+	"net/http"
+)
+
 // Interface represents an interface object.
 type Interface struct {
 	ID                 int              `json:"id"`
@@ -45,4 +50,19 @@ type InterfaceIdentifier struct {
 	ID     int               `json:"id"`
 	Device *DeviceIdentifier `json:"device"`
 	Name   string            `json:"name"`
+}
+
+func (s *DCIMService) GetInterface(id int) (*Interface, error) {
+	req, err := s.c.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/api/dcim/interfaces/%d/", id),
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	iface := new(Interface)
+	err = s.c.Do(req, iface)
+	return iface, err
 }
