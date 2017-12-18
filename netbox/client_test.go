@@ -346,3 +346,17 @@ func testVRFWithTenant(n int, tenant *Tenant) *VRF {
 		Tenant:        tenant,
 	}
 }
+
+func testPrefix(n int) *Prefix {
+	return &Prefix{
+		ID:          n,
+		Description: fmt.Sprintf("Prefix %d Description", n),
+	}
+}
+
+func testPrefixCreate(n int) *Prefix {
+	return &Prefix{
+		ID:          n,
+		Description: fmt.Sprintf("Prefix %d Description", n),
+	}
+}
