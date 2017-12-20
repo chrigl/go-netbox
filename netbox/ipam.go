@@ -16,9 +16,10 @@ package netbox
 
 // An IPAMService is used in a Client to access NetBox's IPAM API methods.
 type IPAMService struct {
-	c        *Client
-	VRFs     *VRFsService
-	Prefixes *PrefixesService
+	c           *Client
+	VRFs        *VRFsService
+	Prefixes    *PrefixesService
+	IPAddresses *IPAddressesService
 }
 
 // NewIPAMService returns a IPAMService initialized with all sub-services.
@@ -29,6 +30,9 @@ func NewIPAMService(client *Client) *IPAMService {
 			c: client,
 		},
 		Prefixes: &PrefixesService{
+			c: client,
+		},
+		IPAddresses: &IPAddressesService{
 			c: client,
 		},
 	}

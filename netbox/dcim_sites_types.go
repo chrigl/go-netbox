@@ -1,5 +1,6 @@
 package netbox
 
+// A Site is a representation of netbox site.
 type Site struct {
 	ID              int     `json:"id"`
 	Name            string  `json:"name"`

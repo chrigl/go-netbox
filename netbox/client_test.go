@@ -360,3 +360,16 @@ func testPrefixCreate(n int) *Prefix {
 		Description: fmt.Sprintf("Prefix %d Description", n),
 	}
 }
+
+func testIPAddress(n int) *IPAddress {
+	return &IPAddress{
+		ID:          n,
+		Description: fmt.Sprintf("IPAddress %d Description", n),
+	}
+}
+func testIPAddressCreate(n int) *IPAddress {
+	return &IPAddress{
+		ID:          n,
+		Description: fmt.Sprintf("IPAddress %d Description", n),
+	}
+}
