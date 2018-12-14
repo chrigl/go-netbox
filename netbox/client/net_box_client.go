@@ -25,13 +25,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/digitalocean/go-netbox/netbox/client/circuits"
-	"github.com/digitalocean/go-netbox/netbox/client/dcim"
-	"github.com/digitalocean/go-netbox/netbox/client/extras"
-	"github.com/digitalocean/go-netbox/netbox/client/ipam"
-	"github.com/digitalocean/go-netbox/netbox/client/secrets"
-	"github.com/digitalocean/go-netbox/netbox/client/tenancy"
-	"github.com/digitalocean/go-netbox/netbox/client/virtualization"
+	"github.com/digitalocean/go-netbox/netbox/client/api"
 )
 
 // Default net box HTTP client.
@@ -43,7 +37,7 @@ const (
 	DefaultHost string = "localhost:8000"
 	// DefaultBasePath is the default BasePath
 	// found in Meta (info) section of spec file
-	DefaultBasePath string = "/api"
+	DefaultBasePath string = "/"
 )
 
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
@@ -58,9 +52,6 @@ func NewHTTPClient(formats strfmt.Registry) *NetBox {
 // using a customizable transport config.
 func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *NetBox {
 	// ensure nullable parameters have default
-	if formats == nil {
-		formats = strfmt.Default
-	}
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
 	}
@@ -72,22 +63,15 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Net
 
 // New creates a new net box client
 func New(transport runtime.ClientTransport, formats strfmt.Registry) *NetBox {
+	// ensure nullable parameters have default
+	if formats == nil {
+		formats = strfmt.Default
+	}
+
 	cli := new(NetBox)
 	cli.Transport = transport
 
-	cli.Circuits = circuits.New(transport, formats)
-
-	cli.Dcim = dcim.New(transport, formats)
-
-	cli.Extras = extras.New(transport, formats)
-
-	cli.IPAM = ipam.New(transport, formats)
-
-	cli.Secrets = secrets.New(transport, formats)
-
-	cli.Tenancy = tenancy.New(transport, formats)
-
-	cli.Virtualization = virtualization.New(transport, formats)
+	cli.API = api.New(transport, formats)
 
 	return cli
 }
@@ -133,19 +117,7 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // NetBox is a client for net box
 type NetBox struct {
-	Circuits *circuits.Client
-
-	Dcim *dcim.Client
-
-	Extras *extras.Client
-
-	IPAM *ipam.Client
-
-	Secrets *secrets.Client
-
-	Tenancy *tenancy.Client
-
-	Virtualization *virtualization.Client
+	API *api.Client
 
 	Transport runtime.ClientTransport
 }
@@ -154,18 +126,6 @@ type NetBox struct {
 func (c *NetBox) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
-	c.Circuits.SetTransport(transport)
-
-	c.Dcim.SetTransport(transport)
-
-	c.Extras.SetTransport(transport)
-
-	c.IPAM.SetTransport(transport)
-
-	c.Secrets.SetTransport(transport)
-
-	c.Tenancy.SetTransport(transport)
-
-	c.Virtualization.SetTransport(transport)
+	c.API.SetTransport(transport)
 
 }

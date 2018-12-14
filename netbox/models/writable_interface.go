@@ -21,6 +21,7 @@ package models
 
 import (
 	"encoding/json"
+	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -32,6 +33,25 @@ import (
 // WritableInterface writable interface
 // swagger:model WritableInterface
 type WritableInterface struct {
+
+	// cable
+	Cable *NestedCable `json:"cable,omitempty"`
+
+	// Connected endpoint
+	// Read Only: true
+	ConnectedEndpoint interface{} `json:"connected_endpoint,omitempty"`
+
+	// Connected endpoint type
+	// Read Only: true
+	ConnectedEndpointType string `json:"connected_endpoint_type,omitempty"`
+
+	// Connection status
+	// Enum: [false true]
+	ConnectionStatus bool `json:"connection_status,omitempty"`
+
+	// Count ipaddresses
+	// Read Only: true
+	CountIpaddresses int64 `json:"count_ipaddresses,omitempty"`
 
 	// Description
 	// Max Length: 100
@@ -45,6 +65,7 @@ type WritableInterface struct {
 	Enabled bool `json:"enabled,omitempty"`
 
 	// Form factor
+	// Enum: [0 200 800 1000 1150 1170 1050 1100 1200 1300 1310 1320 1350 1400 1500 1510 1520 1550 1600 2600 2610 2620 2630 2640 6100 6200 6300 6400 6500 6600 6700 3010 3020 3040 3080 3160 3320 4000 4010 4040 4050 5000 5050 5100 5150 5200 5300 5310 5320 5330 32767]
 	FormFactor int64 `json:"form_factor,omitempty"`
 
 	// ID
@@ -52,10 +73,10 @@ type WritableInterface struct {
 	ID int64 `json:"id,omitempty"`
 
 	// Parent LAG
-	Lag int64 `json:"lag,omitempty"`
+	Lag *int64 `json:"lag,omitempty"`
 
 	// MAC Address
-	MacAddress string `json:"mac_address,omitempty"`
+	MacAddress *string `json:"mac_address,omitempty"`
 
 	// OOB Management
 	//
@@ -63,68 +84,130 @@ type WritableInterface struct {
 	MgmtOnly bool `json:"mgmt_only,omitempty"`
 
 	// Mode
-	Mode int64 `json:"mode,omitempty"`
+	// Enum: [100 200 300]
+	Mode *int64 `json:"mode,omitempty"`
 
 	// MTU
-	// Maximum: 32767
-	// Minimum: 0
+	// Maximum: 65536
+	// Minimum: 1
 	Mtu *int64 `json:"mtu,omitempty"`
 
 	// Name
 	// Required: true
 	// Max Length: 64
+	// Min Length: 1
 	Name *string `json:"name"`
 
 	// tagged vlans
 	// Unique: true
 	TaggedVlans []int64 `json:"tagged_vlans"`
 
+	// tags
+	Tags []string `json:"tags"`
+
 	// Untagged VLAN
-	UntaggedVlan int64 `json:"untagged_vlan,omitempty"`
+	UntaggedVlan *int64 `json:"untagged_vlan,omitempty"`
 }
 
 // Validate validates this writable interface
 func (m *WritableInterface) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCable(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateConnectionStatus(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateDescription(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateDevice(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateFormFactor(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMode(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateMtu(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateTaggedVlans(formats); err != nil {
-		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateTags(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *WritableInterface) validateCable(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Cable) { // not required
+		return nil
+	}
+
+	if m.Cable != nil {
+		if err := m.Cable.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("cable")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+var writableInterfaceTypeConnectionStatusPropEnum []interface{}
+
+func init() {
+	var res []bool
+	if err := json.Unmarshal([]byte(`[false,true]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		writableInterfaceTypeConnectionStatusPropEnum = append(writableInterfaceTypeConnectionStatusPropEnum, v)
+	}
+}
+
+// prop value enum
+func (m *WritableInterface) validateConnectionStatusEnum(path, location string, value bool) error {
+	if err := validate.Enum(path, location, value, writableInterfaceTypeConnectionStatusPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *WritableInterface) validateConnectionStatus(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ConnectionStatus) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateConnectionStatusEnum("connection_status", "body", m.ConnectionStatus); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -154,7 +237,7 @@ var writableInterfaceTypeFormFactorPropEnum []interface{}
 
 func init() {
 	var res []int64
-	if err := json.Unmarshal([]byte(`[0,200,800,1000,1150,1170,1050,1100,1200,1300,1310,1320,1350,1400,1500,1510,1520,1550,1600,2600,2610,2620,2630,2640,3010,3020,3040,3080,3160,4000,4010,4040,4050,5000,5050,5100,5150,5200,32767]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`[0,200,800,1000,1150,1170,1050,1100,1200,1300,1310,1320,1350,1400,1500,1510,1520,1550,1600,2600,2610,2620,2630,2640,6100,6200,6300,6400,6500,6600,6700,3010,3020,3040,3080,3160,3320,4000,4010,4040,4050,5000,5050,5100,5150,5200,5300,5310,5320,5330,32767]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -211,7 +294,7 @@ func (m *WritableInterface) validateMode(formats strfmt.Registry) error {
 	}
 
 	// value enum
-	if err := m.validateModeEnum("mode", "body", m.Mode); err != nil {
+	if err := m.validateModeEnum("mode", "body", *m.Mode); err != nil {
 		return err
 	}
 
@@ -224,11 +307,11 @@ func (m *WritableInterface) validateMtu(formats strfmt.Registry) error {
 		return nil
 	}
 
-	if err := validate.MinimumInt("mtu", "body", int64(*m.Mtu), 0, false); err != nil {
+	if err := validate.MinimumInt("mtu", "body", int64(*m.Mtu), 1, false); err != nil {
 		return err
 	}
 
-	if err := validate.MaximumInt("mtu", "body", int64(*m.Mtu), 32767, false); err != nil {
+	if err := validate.MaximumInt("mtu", "body", int64(*m.Mtu), 65536, false); err != nil {
 		return err
 	}
 
@@ -238,6 +321,10 @@ func (m *WritableInterface) validateMtu(formats strfmt.Registry) error {
 func (m *WritableInterface) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("name", "body", string(*m.Name), 1); err != nil {
 		return err
 	}
 
@@ -256,6 +343,23 @@ func (m *WritableInterface) validateTaggedVlans(formats strfmt.Registry) error {
 
 	if err := validate.UniqueItems("tagged_vlans", "body", m.TaggedVlans); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *WritableInterface) validateTags(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Tags) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Tags); i++ {
+
+		if err := validate.MinLength("tags"+"."+strconv.Itoa(i), "body", string(m.Tags[i]), 1); err != nil {
+			return err
+		}
+
 	}
 
 	return nil

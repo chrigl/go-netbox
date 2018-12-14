@@ -16,20 +16,40 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/digitalocean/go-netbox/netbox/client"
+	runtimeclient "github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/strfmt"
 )
 
 func main() {
-	t := client.DefaultTransportConfig().WithHost("your.netbox.host")
-	c := client.NewHTTPClientWithConfig(nil, t)
+	token := os.Getenv("NETBOX_TOKEN")
+	if token == "" {
+		log.Fatal("no such token provided")
+	}
+	host := os.Getenv("NETBOX_HOST")
+	if host == "" {
+		log.Fatal("no such host provided")
+	}
+	t := runtimeclient.New(host, client.DefaultBasePath, []string{"https"})
+	t.DefaultAuthentication = runtimeclient.APIKeyAuth("Authorization", "header", fmt.Sprintf("Token %v", token))
+	c := client.New(t, strfmt.Default)
 
-	rs, err := c.Dcim.DcimRacksList(nil, nil)
+	// rs, err := c.API.APIIPAMIPAddressesList(nil, nil)
+	// rs, err := c.API.APIDcimDevicesList(nil, nil)
+	// rs, err := c.API.APIDcimInterfacesList(nil, nil)
+	// rs, err := c.API.APIDcimInterfaceConnectionsList(nil, nil)
+	rs, err := c.API.APICircuitsCircuitTerminationsList(nil, nil)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("%v\n", *(rs.Payload.Count))
+	for _, d := range rs.Payload.Results {
+		if d.ConnectedEndpoint != nil {
+			fmt.Printf("%#v\n", d.ConnectedEndpoint)
+		}
+	}
 }

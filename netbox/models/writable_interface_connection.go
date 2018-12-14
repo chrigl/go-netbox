@@ -33,20 +33,15 @@ import (
 // swagger:model WritableInterfaceConnection
 type WritableInterfaceConnection struct {
 
-	// Status
+	//  connected circuittermination
+	ConnectedCircuittermination *int64 `json:"_connected_circuittermination,omitempty"`
+
+	//  connected interface
+	ConnectedInterface *int64 `json:"_connected_interface,omitempty"`
+
+	// Connection status
+	// Enum: [false true]
 	ConnectionStatus bool `json:"connection_status,omitempty"`
-
-	// ID
-	// Read Only: true
-	ID int64 `json:"id,omitempty"`
-
-	// Interface a
-	// Required: true
-	InterfaceA *int64 `json:"interface_a"`
-
-	// Interface b
-	// Required: true
-	InterfaceB *int64 `json:"interface_b"`
 }
 
 // Validate validates this writable interface connection
@@ -54,17 +49,6 @@ func (m *WritableInterfaceConnection) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateConnectionStatus(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateInterfaceA(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateInterfaceB(formats); err != nil {
-		// prop
 		res = append(res, err)
 	}
 
@@ -102,24 +86,6 @@ func (m *WritableInterfaceConnection) validateConnectionStatus(formats strfmt.Re
 
 	// value enum
 	if err := m.validateConnectionStatusEnum("connection_status", "body", m.ConnectionStatus); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *WritableInterfaceConnection) validateInterfaceA(formats strfmt.Registry) error {
-
-	if err := validate.Required("interface_a", "body", m.InterfaceA); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *WritableInterfaceConnection) validateInterfaceB(formats strfmt.Registry) error {
-
-	if err := validate.Required("interface_b", "body", m.InterfaceB); err != nil {
 		return err
 	}
 
